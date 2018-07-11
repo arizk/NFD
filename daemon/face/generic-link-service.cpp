@@ -69,9 +69,8 @@ GenericLinkService::doSendData(const Data& data)
 {
   lp::Packet lpPacket(data.wireEncode());
 
-  if (m_options.allowLocalFields) {
-    encodeLocalFields(data, lpPacket);
-  }
+  // TODO try simply setting allowLocalFields to true and see if it gives the same result
+  encodeLocalFields(data, lpPacket);
 
   this->sendNetPacket(std::move(lpPacket));
 }
