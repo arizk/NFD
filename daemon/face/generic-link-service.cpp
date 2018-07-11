@@ -96,6 +96,13 @@ GenericLinkService::encodeLocalFields(const ndn::TagHost& netPkt, lp::Packet& lp
   if (incomingFaceIdTag != nullptr) {
     lpPacket.add<lp::IncomingFaceIdField>(*incomingFaceIdTag);
   }
+  shared_ptr<lp::NumHopsTag> numHopsTag = netPkt.getTag<lp::NumHopsTag>();
+  if (numHopsTag != nullptr) {
+    lpPacket.add<lp::NumHopsField>(*numHopsTag);
+  }
+  else {
+    lpPacket.add<lp::NumHopsField>(0);
+  }
 }
 
 void
@@ -251,6 +258,12 @@ GenericLinkService::decodeData(const Block& netPkt, const lp::Packet& firstPkt)
   // forwarding expects Data to be created with make_shared
   auto data = make_shared<Data>(netPkt);
 
+  // Increment NumHops
+  if (firstPkt.has<lp::NumHopsField>()) {
+    data->setTag(make_shared<lp::NumHopsTag>(firstPkt.get<lp::NumHopsField>() + 1));
+  }
+
+
   if (firstPkt.has<lp::NackField>()) {
     ++this->nInNetInvalid;
     NFD_LOG_FACE_WARN("received Nack with Data: DROP");
@@ -276,6 +289,10 @@ GenericLinkService::decodeData(const Block& netPkt, const lp::Packet& firstPkt)
 
   if (firstPkt.has<lp::IncomingFaceIdField>()) {
     NFD_LOG_FACE_WARN("received IncomingFaceId: IGNORE");
+  }
+
+  if (firstPkt.has<lp::NumHopsField>()) {
+    data->setTag(make_shared<lp::NumHopsTag>(firstPkt.get<lp::NumHopsField>()));
   }
 
   this->receiveData(*data);
