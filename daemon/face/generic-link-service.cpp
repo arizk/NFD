@@ -290,10 +290,6 @@ GenericLinkService::decodeData(const Block& netPkt, const lp::Packet& firstPkt)
     NFD_LOG_FACE_WARN("received IncomingFaceId: IGNORE");
   }
 
-  if (firstPkt.has<lp::NumHopsField>()) {
-    data->setTag(make_shared<lp::NumHopsTag>(firstPkt.get<lp::NumHopsField>()));
-  }
-
   this->receiveData(*data);
 }
 
